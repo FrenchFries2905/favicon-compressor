@@ -4,7 +4,60 @@
     <meta charset="UTF-8">
     <meta name="color-scheme" content="dark">
     <title>Favicon Compressor</title>
-    <link rel="stylesheet" href="/style.css">
+    <style> body {
+    font-family: system-ui, sans-serif;
+    background-color: #121212;
+    color: #f5f5f5;
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 1rem;
+    text-align: center;
+}
+
+h1 {
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+p {
+    color: #cccccc;
+    margin-bottom: 1.5rem;
+}
+
+input[type="file"] {
+    background: #1f1f1f;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+button {
+    background-color: #2d8cf0;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s ease-in-out;
+}
+
+button:hover {
+    background-color: #1b6cd8;
+}
+
+a {
+    color: #4dd0e1;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 1rem;
+    display: inline-block;
+}
+
+a:hover {
+    text-decoration: underline;
+}</style>
 
 </head>
 
@@ -29,7 +82,48 @@
 
         <div id="downloadLinkContainer"></div>
     </main>
+<script>document.getElementById('faviconForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const file = document.getElementById('imageInput').files[0];
+    const size = parseInt(document.getElementById('sizeSelect').value, 10);
+    
+    if (!file) return alert("Please upload an image.");
 
-    <script src="/favicon-compressor.js"></script>
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        img.src = e.target.result;
+    };
+
+    img.onload = async function () {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, size, size);
+
+        canvas.toBlob(async function (blob) {
+            const arrayBuffer = await blob.arrayBuffer();
+            const uint8Array = new Uint8Array(arrayBuffer);
+
+            const icoBlob = new Blob([uint8Array], { type: 'image/x-icon' });
+            const url = URL.createObjectURL(icoBlob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = "favicon.ico";
+            link.textContent = `Download ${size}x${size} Favicon (.ico)`;
+            link.style.display = "block";
+
+            const container = document.getElementById("downloadLinkContainer");
+            container.innerHTML = "";
+            container.appendChild(link);
+        }, "image/x-icon", 0.9);
+    };
+
+    reader.readAsDataURL(file);
+});</script>
+    
 </body>
 </html>
